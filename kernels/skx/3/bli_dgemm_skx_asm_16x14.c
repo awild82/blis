@@ -212,14 +212,14 @@ void bli_dgemm_skx_asm_16x14(
     LEA(RDX, MEM(,RDX,4))
     LEA(RDX, MEM(RDX,RSI,2)) // 14*k
     LEA(RDX, MEM(RBX,RDX,8,-128)) // b_next
-    LEA(R9, MEM(RCX,63)) // c for prefetching
+    LEA(R15, MEM(RCX,63)) // c for prefetching
 
     VMOVAPD(ZMM(0), MEM(RAX, 0*8)) //pre-load a
     VMOVAPD(ZMM(1), MEM(RAX, 8*8)) //pre-load a
     LEA(RAX, MEM(RAX,16*8)) //adjust a for pre-load
 
-    MOV(R12, VAR(rs_c))
-    MOV(R10, VAR(cs_c))
+    MOV(R13, VAR(rs_c))
+    MOV(R14, VAR(cs_c))
 
     MOV(RDI, RSI)
     AND(RSI, IMM(3))
@@ -253,11 +253,11 @@ void bli_dgemm_skx_asm_16x14(
         LOOP_ALIGN
         LABEL(LOOP2)
 
-            PREFETCH(0, MEM(R9))
+            PREFETCH(0, MEM(R15))
             SUBITER(0)
             PREFETCH(1, MEM(RDX))
             SUBITER(1)
-            PREFETCH(0, MEM(R9,64))
+            PREFETCH(0, MEM(R15,64))
             SUB(RDI, IMM(1))
             SUBITER(2)
             PREFETCH(1, MEM(RDX,64))
@@ -266,7 +266,7 @@ void bli_dgemm_skx_asm_16x14(
             LEA(RAX, MEM(RAX,4*16*8))
             LEA(RBX, MEM(RBX,4*14*8))
             LEA(RDX, MEM(RDX,16*8))
-            LEA(R9, MEM(R9,R10,1))
+            LEA(R15, MEM(R15,R14,1))
 
         JNZ(LOOP2)
 
@@ -317,8 +317,8 @@ void bli_dgemm_skx_asm_16x14(
 
     VXORPD(YMM(2), YMM(2), YMM(2))
 
-    MOV(RAX, R12)
-    MOV(RBX, R10)
+    MOV(RAX, R13)
+    MOV(RBX, R14)
 
     // Check if C is column stride.
     CMP(RAX, IMM(8))
